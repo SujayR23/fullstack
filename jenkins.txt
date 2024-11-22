@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+  stages {
+    stage('version') {
+      steps {
+	echo 'Stage Version'
+        
+      }
+    }
+    stage('hello') {
+      steps {
+	echo 'Stage Hello'
+        sh 'javac Sort.java'
+	sh 'java Sort'
+      }
+    }
+  }
+}
