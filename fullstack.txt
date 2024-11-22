@@ -1,0 +1,488 @@
+1. Implement shell script to transfer application data from local server to remote server using SSH (use scp command inside shell script)
+
+  ==create a text file "file.txt" in home
+  ==open terminal in home and type 
+			
+		>  nano script.sh
+		 
+			scp file.txt pglab@remoteuserip summa.txt
+		press ctrl+x
+		press y
+		press enter
+
+		>  bash script.sh
+-----------------------------------------------------------------------
+FETCHING FILE FROM REMOTE
+scp remoteusername@remoteipaddress:/home/codebind/file.txt /home/test/Desktop/
+remote system password: ssn
+----------------------------------------------------------------------------
+file /app data transfer
+
+ssh-keygen -t rsa -b 2048
+3 enters
+ssh-copy-id 3122215002011@otheruserip_add
+
+ssh 3122215002011@otheruserip_add
+
+nano ~/test_script.sh
+
+echo "hello SSH"
+
+for nano, press CTRL + X, then Y, and hit Enter) automatically exited or else type exit and enter
+
+now in other user pc
+
+ssh theirusername@their_ip_addr 'bash ~/test_script.sh' 
+=============================================================================================
+PUSH&PULL
+
+docker login
+tejaswiniramesh
+teja@1234
+
+sudo docker build -t tejaswiniramesh/flaskapp .
+sudo docker run -p 5000:5000 tejaswiniramesh/flaskapp
+
+docker push tejaswiniramesh/flaskapp
+docker pull tejaswiniramesh/flaskapp
+==================================================================================================
+Jenkins
+
+Start jenkins server and login
+Manage Jenkins > Manage Plugins
+Available > search for Publish over SSH 
+Check the box near it and click download/install
+Manage Jenkins > System
+Scroll down down down to find publish over SSH 
+Click add
+Fill in details
+Name - summa 
+Hostname - rem_ip
+Username - for ssh access on rem system
+Passphrase/ssh key - paste private key from ~/.ssh/id_rsa ( use cat command and this path)
+Click save
+New item
+Freestyle 
+Build section, add build step > send fules or execute over ssh
+Select ssh config u just added
+bash ~/script.sh
+Save
+Build now
+Console output
+------------------------------------------------------------------------------------------------
+2. Build a Jenkins job to automate an application
+
+windows
+
+  == install java version 17
+  == install Jenkins
+  == go to terminal 
+		> java -jar jenkins.war --httpPort=8080
+  == copy the initial password 
+  == go to htp://localhost:8080 and signin credentials
+  == create a new repo in github and upload the neccessary file(java/python)
+  == go to jenkins
+  == new item in dash board
+
+for java file
+	==scm -select git and paste the repo url
+	==in branch specifier, replace */main
+	==in build step, select execute window batch command
+	.> javac file.java
+	.> java file
+	== click save and click build now
+
+3. Jenkins to automate testing of app and to display results
+
+same as previous but create a new repo and upload 2 python files(original code and unittest code)
+#####################################################
+
+helloo.py
+
+class Calculator:
+    def add(self, a, b):
+        return a + b
+
+    def subtract(self, a, b):
+        return a - b
+
+    def multiply(self, a, b):
+        return a * b
+#########################################################################
+
+test_helloo.py
+
+import unittest
+from helloo import Calculator  
+
+class TestCalculator(unittest.TestCase):
+    def setUp(self):
+        """Set up a Calculator instance for all test cases."""
+        self.calc = Calculator()
+
+    def test_add(self):
+        """Test the add method."""
+        result = self.calc.add(3, 5)
+        self.assertEqual(result, 8)
+        result = self.calc.add(-1, 1)
+        self.assertEqual(result, 0)
+        result = self.calc.add(-2, -2)
+        self.assertEqual(result, -4)
+
+    def test_subtract(self):
+        """Test the subtract method."""
+        result = self.calc.subtract(10, 5)
+        self.assertEqual(result, 5)
+        result = self.calc.subtract(0, 5)
+        self.assertEqual(result, -5)
+        result = self.calc.subtract(-1, -1)
+        self.assertEqual(result, 0)
+
+    def test_multiply(self):
+        """Test the multiply method."""
+        result = self.calc.multiply(3, 4)
+        self.assertEqual(result, 12)
+        result = self.calc.multiply(-1, 5)
+        self.assertEqual(result, -5)
+        result = self.calc.multiply(0, 100)
+        self.assertEqual(result, 0)
+
+if __name__ == '__main__':
+    unittest.main()
+########################################################
+
+== go to Jenkins and click new item
+==click frestyle and ok
+==scm -select git and paste the repo url
+==in branch specifier, replace */main
+==in build step, select execute window batch command
+
+	> python -m unittest discover -s . -p "test_*.py"
+
+==save and build now
+
+4. Write and run a jenkins application to automate the deployment of containerization of an application
+
+ubuntu
+
+Jenkins installation
+
+sudo apt-get update
+sudo apt-get install jenkins
+sudo apt install fontconfig openjdk-17-jre
+java --version
+sudo systemctl enable jenkins
+sudo systemctl start jenkins
+sudo systemctl status jenkins
+
+
+sudo cat /var/lib/jenkins/secrets/initialAdminPassword   -------->      Gives the password
+
+paste the password in https://localhost:8080 and sign in Jenkins
+
+docker installation
+
+sudo apt update
+sudo apt install docker.io
+enter 'Y'
+sudo systemctl start docker
+sudo systemctl enable docker
+
+
+mkdir flaskapp
+cd flaskapp
+
+app.py:
+from flask import Flask
+app=Flask(__name__)
+@app.route('/')
+def home():
+	return "Hello World"
+if __name=="__main__":
+	app.run(host='0.0.0.0',Port=5000)
+
+requirements.txt
+
+Flask == 2.3.2
+
+Dockerfile
+
+From python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD ["python","app.py"]
+
+sudo docker build -t flaskapp .
+
+go to Jenkins
+== click new item
+==click frestyle and ok
+==in build step, select execute shell
+
+	> docker run -d -p 5000:5000 flaskapp
+
+==save and build now
+
+now go to http://localhost:5000 and see output
+
+6. Implement a containerised restful api using docker
+
+same as above (docker+jenkins)
+ 
+but replace app.py code with 
+
+####################################################################################
+from flask import Flask, jsonify, request
+
+app = Flask(__name__)
+
+students = [
+    {"id": 1, "name": "Dennis", "age": 20, "major": "Computer Science"},
+    {"id": 2, "name": "Harish", "age": 20, "major": "Mathematics"},
+    {"id": 3, "name": "Badri", "age": 20, "major": "Machine Learning"}
+]
+
+@app.route("/")
+def home():
+    return "Hello World"
+
+# GET all students
+@app.route("/students", methods=["GET"])
+def getStudents():
+    return jsonify(students)
+
+# GET a specific student by ID
+@app.route("/students/<int:studentId>", methods=["GET"])
+def getStudent(studentId):
+    student = next((s for s in students if s["id"] == studentId), None)
+    if student:
+        return jsonify(student)
+    else:
+        return jsonify({"error": "Student not found"}), 404
+
+# POST: Add a new student
+@app.route("/students", methods=["POST"])
+def addStudent():
+    data = request.get_json()
+    if "id" not in data or "name" not in data or "age" not in data or "major" not in data:
+        return jsonify({"error": "Invalid input, all fields are required"}), 400
+
+    # Check for duplicate ID
+    if any(s["id"] == data["id"] for s in students):
+        return jsonify({"error": "Student ID already exists"}), 400
+
+    students.append(data)
+    return jsonify({"message": "Student added successfully", "student": data}), 201
+
+# PUT: Update an existing student's details
+@app.route("/students/<int:studentId>", methods=["PUT"])
+def updateStudent(studentId):
+    data = request.get_json()
+    student = next((s for s in students if s["id"] == studentId), None)
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+
+    # Update student details
+    student.update({key: data[key] for key in data if key in student})
+    return jsonify({"message": "Student updated successfully", "student": student})
+
+# DELETE: Remove a student by ID
+@app.route("/students/<int:studentId>", methods=["DELETE"])
+def deleteStudent(studentId):
+    global students
+    student = next((s for s in students if s["id"] == studentId), None)
+    if not student:
+        return jsonify({"error": "Student not found"}), 404
+
+    students = [s for s in students if s["id"] != studentId]
+    return jsonify({"message": "Student deleted successfully"}), 200
+
+if __name__ == "__main__":
+    app.run("0.0.0.0", 5003)
+
+###################################################################################################
+go to http://localhost:5003/students  ----------get method
+
+6.  Build a dockerfile for a simple web application, create a docker image and run its container.
+
+
+flask_app/
+├── app.py
+├── templates/
+│   └── index.html
+└── static/
+    └── style.css
+
+
+app.py
+
+from flask import Flask, render_template
+
+app = Flask(__name__)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+if __name__ == '__main__':
+    app.run(host='0.0.0.0',port=5004)
+
+sudo docker build -t flaskapp .
+sudo docker run -d -p 5004:5004 flaskapp
+goto htpp://localhost:5004
+
+###################################################
+
+index.html
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Flask Web App</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome to the Flask Web Application</h1>
+        <p>This is a simple web app with HTML and CSS in Flask.</p>
+    </div>
+</body>
+</html>
+
+####################################################################
+
+style.css
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f9;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+h1 {
+    color: #333;
+}
+
+p {
+    color: #555;
+}
+
+
+########################################################################
+requirements.txt
+
+Flask == 2.3.2
+
+###############################################################
+
+Dockerfile
+
+FROM python:3.9-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+EXPOSE 5000
+CMD ["python","app.py"]
+
+#############################################################
+sudo docker build -t flaskapp .
+sudo docker run -d -p 5000:5000 flaskapp
+go to htpp://localhost:5000
+
+
+7+.git version control
+
+mkdir GitEx
+cd GitEx
+
+git init
+git config --global user.name "Name"
+git config --global user.email "name@gmail.com"
+
+print("Hello, World!") > app.py
+
+code .  # Open the project in VSCode
+
+git add .
+git commit -m "initial commit"
+git switch -c branch1
+
+# Go to app.py, change the print statement
+print("First commit on branch1") > app.py
+
+git commit -am "First commit on branch1"
+git switch master
+
+# Change print statement in app.py
+print("Second commit on master") > app.py
+git commit -am "Second commit on master"
+git merge branch1
+
+# (You could see conflict error here)
+
+# Open VSCode to resolve the conflict
+code .  # Open VSCode to manually fix the conflict
+
+# select which code you want -- accept current changes
+
+# After resolving the conflict, commit the changes:
+git commit -am "Fixed Merge Conflict"
+# Conflict Resolved and Merged
+
+git log --oneline  # To view the commit history
+
+-----------------------------------------------------------------------------------------------------------
+
+testing with dockerized container
+
+after Jenkins installation and docker installation and type this in docker terminal
+
+sudo usermod -aG docker jenkins
+sudo systemctl restart jenkins
+
+
+normal docker but add an0ther test_app.py
+
+test_app.py
+
+# test_app.py
+import requests
+
+def test_homepage():
+    response = requests.get("http://localhost:5000")
+    assert response.status_code == 200
+    assert response.text == "Hello, Docker!"
+
+if _name_ == "_main_":
+    test_homepage()
+    print("Tests passed!")
+-----------------------------------------------------------
+requirements.txt
+
+Flask==2.3.3
+requests
+------------------------------------------------------------
+== create a new git repo and add -app.py,test_app.py,reqirements.txt,Dockerfile in a folder named flaskapp
+
+go to Jenkins and create a freestyle projet
+
+
+
+ 
