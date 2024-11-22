@@ -1,0 +1,3 @@
+cd
+cd .ssh
+cd id_rsa
