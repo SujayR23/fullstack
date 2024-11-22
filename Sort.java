@@ -18,7 +18,7 @@ public class Sort {
         Arrays.sort(arr);
 
         // Printing and display sorted array
-        System.out.printf("Modified arr[] : %s",
+        System.out.printf("Modified arr : %s",
                           Arrays.toString(arr));
     }
 }
